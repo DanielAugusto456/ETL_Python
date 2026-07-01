@@ -1,0 +1,6 @@
+database:
+  sql_server:
+    serverType: "Database engine"
+    serverName: "DANIEL"
+    Authentication: "Windows Authentication"
+    DataBase: "BigDataDB"
