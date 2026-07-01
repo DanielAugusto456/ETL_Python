@@ -24,4 +24,7 @@ class Customer(BaseModel):
     def validate_string_fields(cls, value: str) -> str:
         return va.validate_email(value)
     
-    
+    @field_validator("phone")
+    @classmethod
+    def validate_string_fields(cls, value: str) -> str:
+        return va.validate_phone(value)
