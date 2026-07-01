@@ -1,7 +1,6 @@
 import pandas as pd
 from abc import ABC, abstractmethod
-from typing import Optional, Dict, Any, List, Tuple
-from pydantic import ValidationError
+from typing import Dict, Any, List
 
 class BaseCleaner(ABC):
 
@@ -34,5 +33,5 @@ class BaseCleaner(ABC):
     def get_invalid_records(self) -> List[Dict[str, Any]]:
         return self.invalid_records
     
-    def valid_record_to_dataframe(self) -> pd.DataFrame:
-        return pd.DataFrame(self.valid_records)
+    def invalid_record_to_dataframe(self) -> pd.DataFrame:
+        return pd.DataFrame(self.invalid_records)
