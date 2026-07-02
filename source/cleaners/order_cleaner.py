@@ -3,7 +3,6 @@ from .base_cleaner import BaseCleaner
 from models.order_model import Order
 from config.database import get_creds
 
-# Mapea las columnas del CSV (PascalCase) a los campos que espera el modelo Pydantic
 COLUMN_MAP = {
     "CustomerID": "customer_id",
     "OrderDate": "order_date",
@@ -15,11 +14,9 @@ class OrdersCleaner(BaseCleaner):
         data = self.remove_duplicates(data)
         data = self.handle_nulls(data, strategy='drop')
 
-        # Igual que products_cleaner mapea Category -> categoryID,
-        # aquí mapeamos Status (texto) -> statusID usando la BD.
         creds = get_creds()
-        statuses_in_db = pd.read_sql_query("SELECT StatusID, name FROM Status", con=creds.engine)
-        status_map = dict(zip(statuses_in_db['name'], statuses_in_db['StatusID']))
+        statuses_in_db = pd.read_sql_query("SELECT StatusID, StatusName FROM Status", con=creds.engine)
+        status_map = dict(zip(statuses_in_db['StatusName'], statuses_in_db['StatusID']))
 
         data['statusID'] = data['Status'].map(status_map)
 

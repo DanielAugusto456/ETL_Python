@@ -3,7 +3,6 @@ from .base_cleaner import BaseCleaner
 from models.product_model import Product
 from config.database import get_creds
 
-# Mapea las columnas del CSV (PascalCase) a los campos que espera el modelo Pydantic
 COLUMN_MAP = {
     "ProductName": "name",
     "Category": "categoryID",
@@ -17,11 +16,16 @@ class ProductsCleaner(BaseCleaner):
         data = self.remove_duplicates(data)
         data = self.handle_nulls(data, strategy='drop')
 
+        print("\n=== DIAGNÓSTICO DE PRODUCTS CLEANER ===")
+        print(f"Columnas disponibles: {data.columns.tolist()}")
+        print(f"Total de registros: {len(data)}")
+        print(f"Tipos de datos: {data.dtypes}")
+        print("================================\n")
+
         creds = get_creds()
 
-        # El SELECT original no traía CategoryID, y luego se usaba más abajo (KeyError)
         categories_in_db = pd.read_sql_query(
-            "SELECT CategoryID, CategoryName FROM category", con=creds.engine
+            "SELECT CategoryID, CategoryName FROM Category", con=creds.engine
         )
 
         category_map = dict(zip(
@@ -31,6 +35,9 @@ class ProductsCleaner(BaseCleaner):
 
         data['Category'] = data['Category'].map(category_map)
 
+        data = data[data['Price'] >= 0]
+        data = data[data['Stock'] >= 0]
+
         if data['Category'].isna().any():
             missing_categories = data[data['Category'].isna()]['Category'].unique()
             print(f"Categorías no encontradas en BD: {missing_categories}")
@@ -38,17 +45,18 @@ class ProductsCleaner(BaseCleaner):
 
         data['Category'] = data['Category'].astype(int)
 
-        # Descartar productos cuyo nombre ya existe en BD (evita duplicados en re-cargas)
-        products_in_db = pd.read_sql_query("SELECT ProductName FROM Product", con=creds.engine)
+        products_in_db = pd.read_sql_query("SELECT ProductName FROM Products", con=creds.engine)
         product_names_db = set(products_in_db['ProductName'])
         data = self.filter_existing_in_db(data, product_names_db, column='ProductName')
+
+        data = data.drop(columns=['ProductID'], errors='ignore')
+        data = data.rename(columns=COLUMN_MAP)
 
         if data.empty:
             print("No new products to insert.")
             return pd.DataFrame()
 
         data = data.drop(columns=['ProductID'], errors='ignore')
-        data = data.rename(columns=COLUMN_MAP)
 
         for _, row in data.iterrows():
             try:

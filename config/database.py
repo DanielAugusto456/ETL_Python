@@ -2,7 +2,7 @@ from bcpandas import SqlCreds
 
 creds = None
 
-def init_db(server, database, username, password):
+def init_db(server, database, username=None, password=None):
     global creds
     creds = SqlCreds(server, database, username, password)
     return creds

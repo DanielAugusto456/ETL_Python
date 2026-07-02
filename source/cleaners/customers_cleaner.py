@@ -4,7 +4,6 @@ from models.customer_model import Customer
 from normalizer import normalizer
 from config.database import get_creds
 
-# Mapea las columnas del CSV (PascalCase) a los campos que espera el modelo Pydantic
 COLUMN_MAP = {
     "FirstName": "first_name",
     "LastName": "last_name",
@@ -19,10 +18,9 @@ class CustomersCleaner(BaseCleaner):
         data = self.remove_duplicates(data)
         data = self.handle_nulls(data, strategy='drop')
 
-        # Descartar clientes cuyo email ya existe en BD (evita duplicados en re-cargas)
         data['Email'] = data['Email'].astype(str).str.strip().str.lower()
         creds = get_creds()
-        customers_in_db = pd.read_sql_query("SELECT Email FROM Customer", con=creds.engine)
+        customers_in_db = pd.read_sql_query("SELECT Email FROM Customers", con=creds.engine)
         emails_db = set(customers_in_db['Email'].str.lower())
         data = self.filter_existing_in_db(data, emails_db, column='Email')
 
@@ -30,7 +28,6 @@ class CustomersCleaner(BaseCleaner):
             print("No new customers to insert.")
             return pd.DataFrame()
 
-        # Mapear Country (texto) -> countryID usando la BD (CountryCleaner debe correr antes)
         countries_in_db = pd.read_sql_query(
             "SELECT CountryID, CountryName FROM Country", con=creds.engine
         )
@@ -56,10 +53,10 @@ class CustomersCleaner(BaseCleaner):
 
         for _, row in data.iterrows():
             try:
-                row['phone'] = normalizer.phone_normalizer(row['phone'])
-                row['email'] = normalizer.email_normalizer(row['email'])
-                row['first_name'] = normalizer.name_normalizer(row['first_name'])
-                row['last_name'] = normalizer.name_normalizer(row['last_name'])
+                row['Phone'] = normalizer.phone_normalizer(row['phone'])
+                row['Email'] = normalizer.email_normalizer(row['email'])
+                row['First_name'] = normalizer.name_normalizer(row['first_name'])
+                row['Last_name'] = normalizer.name_normalizer(row['last_name'])
                 customer = Customer(**row.to_dict())
                 self.valid_records.append(customer.model_dump())
             except Exception as e:

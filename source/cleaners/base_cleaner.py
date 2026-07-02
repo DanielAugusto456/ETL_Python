@@ -35,16 +35,6 @@ class BaseCleaner(ABC):
         existing_values: set,
         column: str = None,
     ) -> Union[pd.DataFrame, pd.Series]:
-        """
-        Descarta los registros que ya existen en la base de datos.
-
-        - Si `data` es una Series (p. ej. nombres de categoría/estado), compara
-          directamente cada valor contra `existing_values`.
-        - Si `data` es un DataFrame, se debe indicar `column` con el nombre de
-          la columna a comparar contra `existing_values`.
-
-        Registra cuántos registros fueron descartados por ya existir en BD.
-        """
         before = len(data)
 
         if isinstance(data, pd.DataFrame):
