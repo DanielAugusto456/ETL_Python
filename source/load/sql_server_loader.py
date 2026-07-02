@@ -25,7 +25,7 @@ class SqlServerLoader(ABC):
             data = data.rename(columns=self.column_map)
         return data
 
-    def load(self, data: pd.DataFrame) -> None:
+    def load(self, data: pd.DataFrame, identity_insert: bool = False) -> None:
         if data is None or data.empty:
             self.logger.info(f"No hay registros nuevos para cargar en '{self.table_name}'.")
             return
@@ -41,6 +41,7 @@ class SqlServerLoader(ABC):
                 schema=self.schema,
                 index=False,
                 if_exists="append",
+                identity_insert=identity_insert,
             )
             self.logger.info(
                 f"{len(data)} registro(s) cargado(s) en '{self.schema}.{self.table_name}'."
