@@ -9,7 +9,7 @@ class Order(BaseModel):
 
     statusID: int = Field(..., description="The ID of the order status")
 
-    @field_validator("status")
+    @field_validator("order_date")
     @classmethod
     def validate_string_fields(cls, value: str) -> str:
         return va.validate_string_fields(value)

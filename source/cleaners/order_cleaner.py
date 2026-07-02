@@ -1,12 +1,36 @@
 import pandas as pd
 from .base_cleaner import BaseCleaner
 from models.order_model import Order
+from config.database import get_creds
+
+# Mapea las columnas del CSV (PascalCase) a los campos que espera el modelo Pydantic
+COLUMN_MAP = {
+    "CustomerID": "customer_id",
+    "OrderDate": "order_date",
+}
 
 class OrdersCleaner(BaseCleaner):
 
     def clean(self, data: pd.DataFrame) -> pd.DataFrame:
         data = self.remove_duplicates(data)
         data = self.handle_nulls(data, strategy='drop')
+
+        # Igual que products_cleaner mapea Category -> categoryID,
+        # aquí mapeamos Status (texto) -> statusID usando la BD.
+        creds = get_creds()
+        statuses_in_db = pd.read_sql_query("SELECT StatusID, name FROM Status", con=creds.engine)
+        status_map = dict(zip(statuses_in_db['name'], statuses_in_db['StatusID']))
+
+        data['statusID'] = data['Status'].map(status_map)
+
+        if data['statusID'].isna().any():
+            missing_statuses = data[data['statusID'].isna()]['Status'].unique()
+            print(f"Estados no encontrados en BD: {missing_statuses}")
+            data = data.dropna(subset=['statusID'])
+
+        data['statusID'] = data['statusID'].astype(int)
+        data = data.drop(columns=['Status', 'OrderID'], errors='ignore')
+        data = data.rename(columns=COLUMN_MAP)
 
         for _, row in data.iterrows():
             try:

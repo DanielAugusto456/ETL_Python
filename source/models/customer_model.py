@@ -12,19 +12,20 @@ class Customer(BaseModel):
 
     city: str = Field(..., description="The city of the customer", max_length=50)
 
-    country: str = Field(..., description="The country of the customer", max_length=50)
+    countryID: int = Field(..., description="The ID of the country the customer belongs to")
 
-    @field_validator("first_name", "last_name", "email", "city", "country")
+    @field_validator("first_name", "last_name", "city")
     @classmethod
     def validate_string_fields(cls, value: str) -> str:
         return va.validate_string_fields(value)
 
     @field_validator("email")
     @classmethod
-    def validate_string_fields(cls, value: str) -> str:
+    def validate_email_field(cls, value: str) -> str:
+        value = va.validate_string_fields(value)
         return va.validate_email(value)
-    
+
     @field_validator("phone")
     @classmethod
-    def validate_string_fields(cls, value: str) -> str:
+    def validate_phone_field(cls, value: str) -> str:
         return va.validate_phone(value)
