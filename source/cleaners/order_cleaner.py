@@ -4,6 +4,7 @@ from models.order_model import Order
 from config.database import get_creds
 
 COLUMN_MAP = {
+    "OrderID": "order_id",
     "CustomerID": "customer_id",
     "OrderDate": "order_date",
 }
@@ -26,8 +27,12 @@ class OrdersCleaner(BaseCleaner):
             data = data.dropna(subset=['statusID'])
 
         data['statusID'] = data['statusID'].astype(int)
-        data = data.drop(columns=['Status', 'OrderID'], errors='ignore')
+        data = data.drop(columns=['Status'], errors='ignore')
         data = data.rename(columns=COLUMN_MAP)
+
+        existing_ids = pd.read_sql_query("SELECT OrderID FROM Orders", con=creds.engine)
+        existing_order_ids = set(existing_ids['OrderID'].tolist())
+        data = self.filter_existing_in_db(data, existing_order_ids, column='order_id')
 
         for _, row in data.iterrows():
             try:

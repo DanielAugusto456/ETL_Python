@@ -35,6 +35,20 @@ class OrderDetailCleaner(BaseCleaner):
             if removed:
                 print(f"{removed} registros descartados por OrderID no existente")
 
+        if not data.empty and 'product_id' in data.columns:
+            existing = pd.read_sql_query(
+                "SELECT OrderID, ProductID FROM OrderDetail",
+                con=creds.engine
+            )
+            existing_pairs = set(zip(existing['OrderID'], existing['ProductID']))
+            before = len(data)
+            data = data[
+                ~data.apply(lambda r: (r['order_id'], r['product_id']) in existing_pairs, axis=1)
+            ]
+            removed = before - len(data)
+            if removed:
+                print(f"{removed} registro(s) descartado(s) por ya existir en OrderDetail")
+
         if 'product_id' in data.columns and not data.empty:
             products_in_db = pd.read_sql_query(
                 "SELECT ProductID FROM Products",

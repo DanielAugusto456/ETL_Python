@@ -3,6 +3,8 @@ from validations import validation as va
 
 class Order(BaseModel):
 
+    order_id: int = Field(..., description="The ID of the order")
+
     customer_id: int = Field(..., description="The ID of the customer")
 
     order_date: str = Field(..., description="The date of the order")
