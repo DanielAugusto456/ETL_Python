@@ -1,0 +1,6 @@
+pandas==3.0.3
+pydantic==2.13.4
+SQLAlchemy==2.0.51
+pyodbc==5.3.0
+bcpandas==2.7.2
+PyYAML>=6.0

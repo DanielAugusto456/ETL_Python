@@ -1,12 +1,14 @@
+import logging
 import pandas as pd
 from abc import ABC, abstractmethod
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Union
 
 class BaseCleaner(ABC):
 
     def __init__(self):
         self.valid_records: List[Dict[str, Any]] = []
         self.invalid_records: List[Dict[str, Any]] = []
+        self.logger = logging.getLogger(self.__class__.__name__)
 
     @abstractmethod
     def clean(self, data: pd.DataFrame) -> pd.DataFrame:
@@ -27,6 +29,28 @@ class BaseCleaner(ABC):
             self.logger.warning(f"Estrategia '{strategy}' no reconocida")
         return data
     
+    def filter_existing_in_db(
+        self,
+        data: Union[pd.DataFrame, pd.Series],
+        existing_values: set,
+        column: str = None,
+    ) -> Union[pd.DataFrame, pd.Series]:
+        before = len(data)
+
+        if isinstance(data, pd.DataFrame):
+            if column is None:
+                raise ValueError("Debes indicar 'column' cuando 'data' es un DataFrame")
+            filtered = data[~data[column].isin(existing_values)]
+        else:
+            filtered = data[~data.isin(existing_values)]
+
+        removed = before - len(filtered)
+        if removed:
+            self.logger.info(
+                f"{removed} registro(s) descartado(s) por ya existir en la base de datos."
+            )
+        return filtered
+
     def get_valid_records(self) -> List[Dict[str, Any]]:
         return self.valid_records
     

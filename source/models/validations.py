@@ -15,6 +15,6 @@ class validation(BaseModel):
     
     @classmethod
     def validate_phone(cls, value: str) -> str:
-        if not value.isdigit() or len(value) < 12:
+        if not value.isdigit() or len(value) < 10:
             raise ValueError("Invalid phone number")
         return value
