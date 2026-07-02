@@ -1,6 +1,6 @@
 import pandas as pd
 from .base_cleaner import BaseCleaner
-from models.product_model import Product
+from models.order_model import Order
 
 class OrdersCleaner(BaseCleaner):
 
@@ -10,8 +10,8 @@ class OrdersCleaner(BaseCleaner):
 
         for _, row in data.iterrows():
             try:
-                product = Product(**row.to_dict())
-                self.valid_records.append(product.model_dump())
+                order = Order(**row.to_dict())
+                self.valid_records.append(order.model_dump())
             except Exception as e:
                 self.invalid_records.append({"record": row.to_dict(), "error": str(e)})
 

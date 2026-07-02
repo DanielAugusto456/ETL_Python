@@ -7,7 +7,7 @@ class Order(BaseModel):
 
     order_date: str = Field(..., description="The date of the order")
 
-    status: str = Field(..., description="The status of the order", max_length=20)
+    statusID: int = Field(..., description="The ID of the order status")
 
     @field_validator("status")
     @classmethod
