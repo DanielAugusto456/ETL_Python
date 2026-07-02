@@ -53,10 +53,10 @@ class CustomersCleaner(BaseCleaner):
 
         for _, row in data.iterrows():
             try:
-                row['Phone'] = normalizer.phone_normalizer(row['phone'])
-                row['Email'] = normalizer.email_normalizer(row['email'])
-                row['First_name'] = normalizer.name_normalizer(row['first_name'])
-                row['Last_name'] = normalizer.name_normalizer(row['last_name'])
+                row['phone'] = normalizer.phone_normalizer(row['phone'])
+                row['email'] = normalizer.email_normalizer(row['email'])
+                row['first_name'] = normalizer.name_normalizer(row['first_name'])
+                row['last_name'] = normalizer.name_normalizer(row['last_name'])
                 customer = Customer(**row.to_dict())
                 self.valid_records.append(customer.model_dump())
             except Exception as e:

@@ -8,5 +8,5 @@ class CustomerLoader(SqlServerLoader):
         "email": "Email",
         "phone": "Phone",
         "city": "City",
-        "countryID": "CountryID",
+        "countryID": "Country",
     }
